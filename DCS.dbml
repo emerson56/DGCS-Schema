@@ -1,0 +1,15 @@
+Project DGCS {
+database_type: 'SqlServer'
+note: '''
+# Digital Gift Card System
+'''
+}
+
+Table users as U {
+id varchar [pk, increment]
+full_name varchar
+created_at timestamp
+country_code int
+
+note: "table 'users' contains user information"
+}
