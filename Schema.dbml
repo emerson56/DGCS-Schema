@@ -16,7 +16,7 @@ Table cust_order {
     cust_company_name varchar(50) 
     order_channel varchar(25)
     sap_number varchar(25) [null]
-    amount decimal
+    amount decimal(14,2)
     delivery_email_address varchar(200)
     delivery_message varchar(140)
     inserted_at timestamp
@@ -24,10 +24,17 @@ Table cust_order {
 }
 
 Table gift_card {
-id varchar(pk, increment)
-inserted_at timestamp
+    card_id varchar(pk, increment)
+    description varchar(30)
+    sku varchar(30)
+    balance decimal(14,2)
+    last_four varchar(4)
+    number varchar(20)
+    pin varchar(7)
+    inserted_at timestamp
+    last_updated_at timestamp
 
-note: "table contains 'gift cards' information"
+    note: "table contains 'gift cards' information"
 }
 
 Table users as U {
