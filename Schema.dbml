@@ -37,7 +37,7 @@ Table item {
 }
 
 Table fulfillment_order {
-    fulfillment_order_id varchar(pk, increment)
+    fulfillment_order_id varchar(32) [pk]
     cust_order_id varchar(32)
     card_id varchar(32)
     transaction_ref_id varchar(32)
@@ -46,14 +46,21 @@ Table fulfillment_order {
 
 Table fulfillment_order_item {
     fulfillment_order_id varchar(32)
-    fulfillment_order_item_id varchar(32)
+    fulfillment_order_item_id varchar(32) [pk]
     fulfillment_status job_state
     gift_card_reference_number varchar(32) [note: "ties a fulfilment order  to an actual card number. this could be the actual card number"]
 }
 
+Table fulfillment_item_delivery
+{
+    fulfillment_item_delivery_id varchar(32)
+    fulfillment_order_item_id varchar(32)
+    delivery_status job_state 
+}
+
 
 Table gift_card {
-    card_id varchar(32)
+    card_id varchar(32) [pk]
     description varchar(30)
     sku varchar(30)
     balance decimal(14,2)
@@ -66,17 +73,21 @@ Table gift_card {
     note: "table contains 'gift cards' information"
 }
 
-Table provisioning_details {
-    
+Table svs_responses {
+    fulfillment_order_item_id varchar(32)
+    operation_status_code varchar(10)
+    status_description varchar(100)
+    sku varchar(50)
+    bin_range_type varchar(50)
+    inserted_at timestamp
 }
 
-Table users as U {
-id varchar [pk, increment]
-full_name varchar
-created_at timestamp
-country_code int
-
-note: "table 'users' contains user information"
+Table balance_update {
+    balance_update_id int [pk]
+    card_id varchar(32)
+    new_balance decimal(14, 2)
+    old_balance decimal (14,2)
+    inserted_at timestamp
 }
 
 enum job_state
