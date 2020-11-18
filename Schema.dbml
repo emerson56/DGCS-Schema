@@ -6,7 +6,7 @@ note: '''
 }
 
 Table cust_order {
-    cust_order_id varchar(pk)
+    cust_order_id varchar(32) 
     order_system_id varchar(8)
     ordering_system_order_id varchar(255)
     cust_first_name varchar(50)
@@ -16,25 +16,58 @@ Table cust_order {
     cust_company_name varchar(50) 
     order_channel varchar(25)
     sap_number varchar(25) [null]
-    amount decimal(14,2)
-    delivery_email_address varchar(200)
-    delivery_message varchar(140)
+    total_amount decimal(14,2)
     inserted_at timestamp
     last_updated_at timestamp
 }
 
+Table  cust_order_itm {
+    cust_order_id varchar(32)
+    item_code varchar(16)
+    quantity int
+    amount_requested decimal(14,2)
+    delivery_email_address varchar(200)
+    delivery_message varchar(140)
+}
+
+Table item {
+    item_code varchar(pk)
+    sku varchar(10)
+    item_description varchar(255)
+}
+
+Table fulfillment_order {
+    fulfillment_order_id varchar(pk, increment)
+    cust_order_id varchar(32)
+    card_id varchar(32)
+    transaction_ref_id varchar(32)
+    status varchar(12)
+}
+
+Table fulfillment_order_item {
+    fulfillment_order_id varchar(32)
+    fulfillment_order_item_id varchar(32)
+    fulfillment_status job_state
+    gift_card_reference_number varchar(32) [note: "ties a fulfilment order  to an actual card number. this could be the actual card number"]
+}
+
+
 Table gift_card {
-    card_id varchar(pk, increment)
+    card_id varchar(32)
     description varchar(30)
     sku varchar(30)
     balance decimal(14,2)
     last_four varchar(4)
-    number varchar(20)
+    card_number varchar(20)
     pin varchar(7)
     inserted_at timestamp
     last_updated_at timestamp
 
     note: "table contains 'gift cards' information"
+}
+
+Table provisioning_details {
+    
 }
 
 Table users as U {
@@ -44,4 +77,12 @@ created_at timestamp
 country_code int
 
 note: "table 'users' contains user information"
+}
+
+enum job_state
+{
+    created [note: 'Waiting to be processed']
+    running
+    complete
+    failed
 }
