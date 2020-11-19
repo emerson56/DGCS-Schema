@@ -53,7 +53,7 @@ Table fulfillment_order_item as FOI {
 
 Table fulfillment_item_delivery as FID
 {
-    fulfillment_item_delivery_id varchar(32)
+    fulfillment_item_delivery_id varchar(32) [primary key]
     fulfillment_order_item_id varchar(32) [ref: FOI.fulfillment_order_item_id < FID.fulfillment_order_item_id]
     delivery_status job_state 
 }
@@ -77,7 +77,7 @@ Table gift_card {
 Table svs_responses {
     id int [primary key]
     fulfillment_order_item_id varchar(32)
-    operation_status_code varchar(10)
+    operation_status_code varchar(10) [note: "this is the value returned by SVS. We might need another column to represent scenarios when we didn't get a response"]   
     sku varchar(50)
     bin_range_type varchar(50)
     inserted_at timestamp
@@ -92,7 +92,7 @@ Table balance_update {
     balance_update_id int [pk]
     card_id varchar(32)
     new_balance decimal(14, 2)
-    old_balance decimal (14,2)
+    old_balance decimal (14,2) [note: "may not need this"]
     inserted_at timestamp
 }
 
