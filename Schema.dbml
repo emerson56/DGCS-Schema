@@ -5,8 +5,8 @@ note: '''
 '''
 }
 
-Table cust_order {
-    cust_order_id varchar(32) 
+Table cust_order  as CO {
+    cust_order_id varchar(32) [primary key]
     order_system_id varchar(8)
     ordering_system_order_id varchar(255)
     cust_first_name varchar(50)
@@ -17,13 +17,15 @@ Table cust_order {
     order_channel varchar(25)
     sap_number varchar(25) [null]
     total_amount decimal(14,2)
+    payment_session_id varchar(32) [note: "could probably go to fulfillment order table as well depending on who's creating the order placed event"]
+    status order_state
     inserted_at timestamp
-    last_updated_at timestamp
 }
 
-Table  cust_order_itm {
-    cust_order_id varchar(32)
-    item_code varchar(16)
+Table  cust_order_itm as COI {
+    cust_order_itm_id varchar(32) [primary key]
+    cust_order_id varchar(32) [ref:  CO.cust_order_id < COI.cust_order_id]
+    item_code varchar(16) [ref: item.item_code < COI.item_code]
     quantity int
     amount_requested decimal(14,2)
     delivery_email_address varchar(200)
@@ -31,29 +33,34 @@ Table  cust_order_itm {
 }
 
 Table item {
-    item_code varchar(pk)
+    item_code varchar(32) [primary key]
     sku varchar(10)
     item_description varchar(255)
 }
 
-Table fulfillment_order {
-    fulfillment_order_id varchar(pk, increment)
-    cust_order_id varchar(32)
-    card_id varchar(32)
-    transaction_ref_id varchar(32)
+Table fulfillment_order as FO {
+    fulfillment_order_id varchar(32) [primary key]
+    cust_order_id varchar(32) [ref: CO.cust_order_id - FO.cust_order_id]
     status varchar(12)
 }
 
-Table fulfillment_order_item {
-    fulfillment_order_id varchar(32)
-    fulfillment_order_item_id varchar(32)
+Table fulfillment_order_item as FOI {
+    fulfillment_order_item_id varchar(32) [primary key]
+    fulfillment_order_id varchar(32) [ref: FO.fulfillment_order_id < FOI.fulfillment_order_id]
     fulfillment_status job_state
     gift_card_reference_number varchar(32) [note: "ties a fulfilment order  to an actual card number. this could be the actual card number"]
 }
 
+Table fulfillment_item_delivery as FID
+{
+    fulfillment_item_delivery_id varchar(32) [primary key]
+    fulfillment_order_item_id varchar(32) [ref: FOI.fulfillment_order_item_id < FID.fulfillment_order_item_id]
+    delivery_status job_state 
+}
+
 
 Table gift_card {
-    card_id varchar(32)
+    card_id varchar(32) [primary key]
     description varchar(30)
     sku varchar(30)
     balance decimal(14,2)
@@ -62,21 +69,31 @@ Table gift_card {
     pin varchar(7)
     inserted_at timestamp
     last_updated_at timestamp
+    bin_range_type varchar(15)
 
     note: "table contains 'gift cards' information"
 }
 
-Table provisioning_details {
-    
+Table svs_responses {
+    id int [primary key]
+    fulfillment_order_item_id varchar(32)
+    operation_status_code varchar(10) [note: "this is the value returned by SVS. We might need another column to represent scenarios when we didn't get a response"]   
+    sku varchar(50)
+    bin_range_type varchar(50)
+    inserted_at timestamp
 }
 
-Table users as U {
-id varchar [pk, increment]
-full_name varchar
-created_at timestamp
-country_code int
+Table svs_codes {
+    code varchar(10)
+    description varchar(100)
+}
 
-note: "table 'users' contains user information"
+Table balance_update {
+    balance_update_id int [pk]
+    card_id varchar(32)
+    new_balance decimal(14, 2)
+    old_balance decimal (14,2) [note: "may not need this"]
+    inserted_at timestamp
 }
 
 enum job_state
@@ -85,4 +102,10 @@ enum job_state
     running
     complete
     failed
+}
+
+enum order_state
+{
+    placed
+    paid_for
 }
